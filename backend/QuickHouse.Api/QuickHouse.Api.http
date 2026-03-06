@@ -1,0 +1,6 @@
+@QuickHouse.Api_HostAddress = http://localhost:5200
+
+GET {{QuickHouse.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
