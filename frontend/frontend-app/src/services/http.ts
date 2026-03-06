@@ -7,9 +7,12 @@ export interface ApiResponse<T> {
 }
 
 const http = axios.create({
-  baseURL: 'http://localhost:5200',
+
+  baseURL: '/api', // 改成相对路径，剩下的交给 Nginx 转发
+  
   timeout: 10000,
-})
+  
+  })
 
 http.interceptors.response.use(
   (response) => {
