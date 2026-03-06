@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend/QuickHouse.Api
+      dockerfile: Dockerfile
+    environment:
+      # 【神级操作】：利用 .NET 环境变量自动覆盖 appsettings.json 里的连接字符串，实现数据库挂载！
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/quickhouse.db
+    volumes:
+      # 将服务器的 ./db_data 目录挂载到容器内，数据永不丢失
+      - ./db_data:/app/data
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend/frontend-app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80" # 腾讯云的 80 端口映射给前端
+    depends_on:
+      - backend
+    restart: always
