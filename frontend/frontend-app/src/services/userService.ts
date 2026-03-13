@@ -6,6 +6,8 @@ export interface User {
   gender: string
   contact: string
   addedTime: string
+  roleId?: number | null
+  roleName?: string | null
 }
 
 export interface UserQueryParams {
@@ -25,19 +27,29 @@ export async function fetchUsers(params: UserQueryParams) {
 }
 
 export async function createUser(
-  data: Pick<User, 'userName' | 'gender' | 'contact'> & Partial<Pick<User, 'addedTime'>>,
+  data: { userName: string; password: string; gender: string; contact: string; roleId?: number; realName?: string },
 ) {
   return http.post<User, User>('/api/users', data)
 }
 
 export async function updateUser(
   id: number,
-  data: Pick<User, 'userName' | 'gender' | 'contact'> & Partial<Pick<User, 'addedTime'>>,
+  data: { userName: string; password?: string; gender: string; contact: string; realName?: string },
 ) {
   return http.put<User, User>(`/api/users/${id}`, data)
 }
 
 export async function deleteUser(id: number) {
   return http.delete<string, string>(`/api/users/${id}`)
+}
+
+export async function updateUserRole(id: number, roleId: number) {
+  return http.put<string, string>(`/api/users/${id}/role`, { roleId })
+}
+
+export async function checkUserExists(userName: string, excludeId?: number) {
+  return http.get<{ exists: boolean }, { exists: boolean }>('/api/users/check', {
+    params: { userName: userName?.trim(), excludeId },
+  })
 }
 

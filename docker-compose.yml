@@ -1,24 +1,51 @@
 version: '3.8'
 
+# 快找房 v2.0：与 v1 相同的 Docker 部署方式，数据库改为 MySQL
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: quickhouse-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Root123!
+      MYSQL_DATABASE: quickhouse
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - quickhouse_mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pRoot123!"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
       context: ./backend/QuickHouse.Api
       dockerfile: Dockerfile
+    container_name: quickhouse-api
     environment:
-      # 【神级操作】：利用 .NET 环境变量自动覆盖 appsettings.json 里的连接字符串，实现数据库挂载！
-      - ConnectionStrings__DefaultConnection=Data Source=/app/data/quickhouse.db
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=quickhouse;User=root;Password=Root123!;"
+      ASPNETCORE_ENVIRONMENT: Production
     volumes:
-      # 将服务器的 ./db_data 目录挂载到容器内，数据永不丢失
-      - ./db_data:/app/data
+      - quickhouse_uploads:/app/wwwroot/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
     restart: always
 
   frontend:
     build:
       context: ./frontend/frontend-app
       dockerfile: Dockerfile
+    container_name: quickhouse-frontend
     ports:
-      - "8080:80" # 腾讯云的 80 端口映射给前端
+      - "8080:80"
     depends_on:
       - backend
     restart: always
+
+volumes:
+  quickhouse_mysql_data:
+  quickhouse_uploads:

@@ -1,23 +1,52 @@
-import { Card, Form, Input, Button, message } from 'antd'
+import { Card, Form, Input, Button, Checkbox, message } from 'antd'
 import { login } from '../services/authService'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
+const REMEMBER_KEY = 'quickhouse_remember'
+
+function loadRemember() {
+  try {
+    const raw = localStorage.getItem(REMEMBER_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as { userName?: string; password?: string; remember?: boolean }
+  } catch {
+    return null
+  }
+}
+
+function saveRemember(payload: { userName: string; password: string; remember: boolean }) {
+  if (payload.remember) {
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify(payload))
+  } else {
+    localStorage.removeItem(REMEMBER_KEY)
+  }
+}
+
 export function LoginPage() {
   const [form] = Form.useForm()
   const navigate = useNavigate()
-  const { login: setUser } = useAuth()
+  const { login: setAuth } = useAuth()
 
   const handleFinish = async (values: { userName: string; password: string }) => {
     try {
       const res = await login(values.userName, values.password)
+      const remember = !!form.getFieldValue('remember')
+      saveRemember({ userName: values.userName, password: values.password, remember })
       message.success('登录成功')
-      setUser(res.userName)
-      navigate('/houses')
+      setAuth({ token: res.token, user: res.user })
+      navigate('/home')
     } catch (err: any) {
-      message.error(err?.message || '登录失败')
+      const msg = err?.message || '登录失败'
+      message.error(msg)
+      form.setFields([
+        { name: 'userName', errors: [msg] },
+        { name: 'password', errors: [''] },
+      ])
     }
   }
+
+  const remembered = loadRemember()
 
   return (
     <div
@@ -55,7 +84,7 @@ export function LoginPage() {
           <Form.Item
             label="账号"
             name="userName"
-            initialValue="admin"
+            initialValue={remembered?.userName ?? 'admin'}
             rules={[{ required: true, message: '请输入账号' }]}
           >
             <Input placeholder="请输入账号" />
@@ -63,10 +92,13 @@ export function LoginPage() {
           <Form.Item
             label="密码"
             name="password"
-            initialValue="123456"
+            initialValue={remembered?.password ?? ''}
             rules={[{ required: true, message: '请输入密码' }]}
           >
             <Input.Password placeholder="请输入密码" />
+          </Form.Item>
+          <Form.Item name="remember" valuePropName="checked" initialValue={!!remembered?.remember}>
+            <Checkbox>记住密码</Checkbox>
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block>

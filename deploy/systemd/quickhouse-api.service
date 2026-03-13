@@ -1,0 +1,19 @@
+[Unit]
+Description=QuickHouse API (.NET 8)
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/quickhouse/api
+ExecStart=/usr/bin/dotnet /var/www/quickhouse/api/QuickHouse.Api.dll
+Restart=always
+RestartSec=5
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+# Optional: override configs via env vars
+# Environment=ConnectionStrings__DefaultConnection=Server=localhost;Database=quickhouse;User=root;Password=YOUR_PASSWORD;
+# Environment=Jwt__Key=CHANGE_ME_IN_PROD
+# Environment=Amap__Key=YOUR_AMAP_KEY
+
+[Install]
+WantedBy=multi-user.target
+

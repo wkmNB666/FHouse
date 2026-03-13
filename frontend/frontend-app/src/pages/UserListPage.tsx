@@ -7,9 +7,11 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  updateUserRole,
   type User,
 } from '../services/userService'
 import { DynamicFormModal } from '../components/DynamicFormModal'
+import { useAuth } from '../contexts/AuthContext'
 
 export function UserListPage() {
   const [form] = Form.useForm()
@@ -21,6 +23,9 @@ export function UserListPage() {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<User | null>(null)
+
+  const { user } = useAuth()
+  const canDelete = user?.role === '管理员' || user?.role === '最高管理员'
 
   const loadData = async (pageIndex = page, size = pageSize) => {
     try {
@@ -81,17 +86,21 @@ export function UserListPage() {
         await updateUser(editing.id, {
           ...editing,
           userName: values.userName,
+          password: values.password || undefined,
           gender: values.gender,
           contact: values.contact,
-          addedTime: editing.addedTime,
         })
+        if (values.roleId) {
+          await updateUserRole(editing.id, values.roleId)
+        }
         message.success('更新成功')
       } else {
         await createUser({
           userName: values.userName,
+          password: values.password,
           gender: values.gender,
           contact: values.contact,
-          addedTime: dayjs().toISOString(),
+          roleId: values.roleId || undefined,
         })
         message.success('创建成功')
       }
@@ -109,6 +118,12 @@ export function UserListPage() {
       dataIndex: 'userName',
     },
     {
+      title: '密码',
+      render: (_: any, record: User) =>
+        user?.id === record.id || user?.role === '最高管理员' ? '已设置' : '***',
+      width: 90,
+    },
+    {
       title: '性别',
       dataIndex: 'gender',
     },
@@ -122,6 +137,11 @@ export function UserListPage() {
       dataIndex: 'contact',
     },
     {
+      title: '角色',
+      dataIndex: 'roleName',
+      render: (v: string) => v || '-',
+    },
+    {
       title: '操作',
       width: 140,
       render: (_: any, record: User) => (
@@ -129,9 +149,17 @@ export function UserListPage() {
           <Button type="link" size="small" onClick={() => handleEdit(record)} style={{ padding: 0 }}>
             编辑
           </Button>
-          <Button type="link" size="small" danger onClick={() => handleDelete(record)} style={{ padding: 0 }}>
-            删除
-          </Button>
+          {canDelete ? (
+            <Button
+              type="link"
+              size="small"
+              danger
+              onClick={() => handleDelete(record)}
+              style={{ padding: 0 }}
+            >
+              删除
+            </Button>
+          ) : null}
         </>
       ),
     },
@@ -183,6 +211,8 @@ export function UserListPage() {
                 userName: editing.userName,
                 gender: editing.gender,
                 contact: editing.contact,
+                roleId: editing.roleId ?? undefined,
+                id: editing.id,
               }
             : undefined
         }

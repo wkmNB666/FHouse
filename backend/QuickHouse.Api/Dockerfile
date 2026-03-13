@@ -12,8 +12,9 @@ RUN dotnet publish "QuickHouse.Api.csproj" -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-# 创建数据库持久化目录
-RUN mkdir -p /app/data
-# .NET 8 容器默认监听 8080 端口
+# v2: 静态文件目录（房源上传图片）
+RUN mkdir -p /app/wwwroot/uploads/houses
+# 容器内监听 8080，与 Nginx 反代一致
+ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "QuickHouse.Api.dll"]
