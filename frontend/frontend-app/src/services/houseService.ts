@@ -37,31 +37,31 @@ export interface HouseQueryParams {
 }
 
 export async function fetchHouses(params: HouseQueryParams) {
-  return http.get<PaginatedResult<House>, PaginatedResult<House>>('/api/houses', { params })
+  return http.get<PaginatedResult<House>, PaginatedResult<House>>('/houses', { params })
 }
 
 export async function fetchHousesLite(params: { page?: number; pageSize?: number; communityName?: string }) {
-  return http.get<PaginatedResult<House>, PaginatedResult<House>>('/api/houses', { params })
+  return http.get<PaginatedResult<House>, PaginatedResult<House>>('/houses', { params })
 }
 
 export async function createHouse(
   data: Partial<Omit<House, 'id'>>,
 ) {
-  return http.post<House, House>('/api/houses', data)
+  return http.post<House, House>('/houses', data)
 }
 
 export async function updateHouse(
   id: number,
   data: Partial<Omit<House, 'id'>>,
 ) {
-  return http.put<House, House>(`/api/houses/${id}`, data)
+  return http.put<House, House>(`/houses/${id}`, data)
 }
 
 export async function deleteHouse(id: number) {
-  return http.delete<string, string>(`/api/houses/${id}`)
+  return http.delete<string, string>(`/houses/${id}`)
 }
 
 export async function auditHouse(id: number, data: { status: number; remark?: string }) {
-  return http.put<House, House>(`/api/houses/${id}/audit`, data)
+  return http.put<House, House>(`/houses/${id}/audit`, data)
 }
 

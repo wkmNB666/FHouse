@@ -36,7 +36,7 @@ export interface ContractQueryParams {
 }
 
 export async function fetchContracts(params: ContractQueryParams) {
-  return http.get<PaginatedResult<ContractItem>, PaginatedResult<ContractItem>>('/api/contracts', { params })
+  return http.get<PaginatedResult<ContractItem>, PaginatedResult<ContractItem>>('/contracts', { params })
 }
 
 export async function createContract(data: {
@@ -50,7 +50,7 @@ export async function createContract(data: {
   contractPrice: number
   signedAt: string
 }) {
-  return http.post<{ id: number }, { id: number }>('/api/contracts', data)
+  return http.post<{ id: number }, { id: number }>('/contracts', data)
 }
 
 export async function updateContract(
@@ -67,10 +67,10 @@ export async function updateContract(
     signedAt: string
   },
 ) {
-  return http.put<string, string>(`/api/contracts/${id}`, data)
+  return http.put<string, string>(`/contracts/${id}`, data)
 }
 
 export async function deleteContract(id: number) {
-  return http.delete<string, string>(`/api/contracts/${id}`)
+  return http.delete<string, string>(`/contracts/${id}`)
 }
 

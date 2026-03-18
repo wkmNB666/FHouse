@@ -13,21 +13,21 @@ export interface LoginResponse {
 }
 
 export async function login(userName: string, password: string) {
-  return http.post<LoginResponse, LoginResponse>('/api/auth/login', { userName, password })
+  return http.post<LoginResponse, LoginResponse>('/auth/login', { userName, password })
 }
 
 export async function fetchMe() {
   return http.get<
     { id?: number; userName: string; realName?: string | null; contact?: string | null; role?: string; permissions?: string },
     { id?: number; userName: string; realName?: string | null; contact?: string | null; role?: string; permissions?: string }
-  >('/api/auth/me')
+  >('/auth/me')
 }
 
 export async function updateProfile(data: { realName?: string | null; contact?: string | null }) {
-  return http.put<string, string>('/api/auth/profile', data)
+  return http.put<string, string>('/auth/profile', data)
 }
 
 export async function changePassword(data: { oldPassword: string; newPassword: string }) {
-  return http.put<string, string>('/api/auth/change-password', data)
+  return http.put<string, string>('/auth/change-password', data)
 }
 

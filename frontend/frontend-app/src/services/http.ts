@@ -40,7 +40,7 @@ const http = axios.create({
 http.interceptors.request.use((config) => {
   const token = getToken()
   if (token) {
-    config.headers = config.headers ?? {}
+    if (!config.headers) config.headers = {} as import('axios').AxiosRequestHeaders
     config.headers.Authorization = `Bearer ${token}`
   }
 
@@ -91,6 +91,13 @@ http.interceptors.response.use(
     if (pendingCount <= 0) {
       pendingCount = 0
       setLoading(false)
+    }
+    if (error.response?.status === 401) {
+      const isLoginRequest = String(error.config?.url ?? '').includes('/auth/login')
+      if (!isLoginRequest) {
+        localStorage.removeItem(AUTH_STORAGE_KEY)
+        window.location.replace('/login')
+      }
     }
     return Promise.reject(error)
   },
